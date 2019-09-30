@@ -8,6 +8,15 @@ from mayavi import mlab
 import utils
 from reconstruct_surface import MLP
 
+def output_mesh(mesh_v, mesh_f, f):
+    
+    with open(f, 'w') as out: 
+        
+        for i in range(0, mesh_v.shape[0]):
+            out.write('v %f %f %f\n'%(mesh_v[i, 0], mesh_v[i, 1], mesh_v[i, 2]))
+
+        for j in range(0, mesh_f.shape[0]):
+            out.write('f %d %d %d\n'%(mesh_f[j,0], mesh_f[j,1], mesh_f[j,2]))
 
 def export_reconstruction(patch_uvs, patch_tx, patch_models, scale=1.0):
     from mayavi import mlab
@@ -26,6 +35,7 @@ def export_reconstruction(patch_uvs, patch_tx, patch_models, scale=1.0):
             print(mesh_v.shape)
             print("The size of mesh faces is ")
             print(mesh_f.shape)
+            output_mesh(mesh_v, mesh_f, 'output%d.obj'%(i))
             # mlab.triangular_mesh(mesh_v[:, 0], mesh_v[:, 1], mesh_v[:, 2], mesh_f, color=(0.2, 0.2, 0.8))
 
 
@@ -47,7 +57,7 @@ def main():
     else:
         model.load_state_dict(state["final_model"])
 
-    plot_reconstruction(state["patch_uvs"], state["patch_txs"], model, scale=args.scale)
+    export_reconstruction(state["patch_uvs"], state["patch_txs"], model, scale=args.scale)
 
 
 if __name__ == "__main__":
