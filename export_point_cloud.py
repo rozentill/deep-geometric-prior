@@ -16,7 +16,7 @@ def output_mesh(mesh_v, mesh_f, f):
             out.write('v %f %f %f\n'%(mesh_v[i, 0], mesh_v[i, 1], mesh_v[i, 2]))
 
         for j in range(0, mesh_f.shape[0]):
-            out.write('f %d %d %d\n'%(mesh_f[j,0], mesh_f[j,1], mesh_f[j,2]))
+            out.write('f %d %d %d\n'%(mesh_f[j,0]+1, mesh_f[j,1]+1, mesh_f[j,2]+1))
 
 def export_reconstruction(patch_uvs, patch_tx, patch_models, scale=1.0):
     from mayavi import mlab
