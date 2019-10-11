@@ -9,21 +9,31 @@ import utils
 from reconstruct_surface import MLP
 
 
+
 def plot_reconstruction(patch_uvs, patch_tx, patch_models, scale=1.0):
     from mayavi import mlab
+    
+    with open("output.obj", 'w') as out :
+        
 
-    with torch.no_grad():
-        for i in range(len(patch_models)):
-            n = 128
-            translate_i, scale_i, rotate_i = patch_tx[i]
-            uv_i = utils.meshgrid_from_lloyd_ts(patch_uvs[i].cpu().numpy(), n, scale=scale).astype(np.float32)
-            uv_i = torch.from_numpy(uv_i).to(patch_uvs[0])
-            y_i = patch_models[i](uv_i)
+        with torch.no_grad():
+            start_ind = 1
+            for i in range(len(patch_models)):
+                n = 128
+                translate_i, scale_i, rotate_i = patch_tx[i]
+                uv_i = utils.meshgrid_from_lloyd_ts(patch_uvs[i].cpu().numpy(), n, scale=scale).astype(np.float32)
+                uv_i = torch.from_numpy(uv_i).to(patch_uvs[0])
+                y_i = patch_models[i](uv_i)
 
-            mesh_v = ((y_i.squeeze() @ rotate_i.transpose(0, 1)) / scale_i - translate_i).cpu().numpy()
-            mesh_f = utils.meshgrid_face_indices(n)
-            mlab.triangular_mesh(mesh_v[:, 0], mesh_v[:, 1], mesh_v[:, 2], mesh_f, color=(0.2, 0.2, 0.8))
-
+                mesh_v = ((y_i.squeeze() @ rotate_i.transpose(0, 1)) / scale_i - translate_i).cpu().numpy()
+                mesh_f = utils.meshgrid_face_indices(n)
+                mlab.triangular_mesh(mesh_v[:, 0], mesh_v[:, 1], mesh_v[:, 2], mesh_f, color=(0.2, 0.2, 0.8))
+                for iv in range(0, mesh_v.shape[0]):
+                
+                    out.write('v %f %f %f\n'%(mesh_v[iv, 0], mesh_v[iv, 1], mesh_v[iv, 2]))
+                for fi in range(0, mesh_f.shape[0]):
+                    out.write('f %d %d %d\n'%(mesh_f[fi, 0]+start_ind, mesh_f[fi,1]+start_ind, mesh_f[fi, 2]+start_ind))
+                start_ind += mesh_v.shape[0]
         mlab.show()
 
 
